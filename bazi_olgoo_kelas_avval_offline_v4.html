@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>بازی الگوهای رنگارنگ</title>
+<style>
+:root{
+  --bg:#f7f9fc;--card:#ffffff;--panel:#f3f6fb;--text:#182230;--muted:#667085;--border:#d8e0ec;
+  --accent:#6d5ce8;--accent-bg:#eef0ff;--red:#ef4444;--blue:#0ea5e9;--green:#22c55e;
+  --yellow:#facc15;--purple:#8b5cf6;--orange:#f59e0b;--cyan:#22d3ee;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:14px;background:var(--bg);font-family:Tahoma,Arial,sans-serif;color:var(--text)}
+button,input{font:inherit}
+button{touch-action:manipulation}
+#game{max-width:760px;margin:0 auto;display:grid;gap:14px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:24px;padding:16px}
+.hidden{display:none!important}
+.footer{text-align:center;font-size:13px;color:var(--muted);line-height:1.8}
+.btn{min-height:46px;border:0;border-radius:14px;padding:10px 16px;font-weight:900;cursor:pointer;background:var(--accent);color:#fff}
+.btn.secondary{background:var(--panel);color:var(--text);border:1px solid var(--border)}
+.name{width:100%;min-height:50px;border:2px solid #dce3ee;border-radius:15px;padding:10px 13px;font-size:16px;outline:none;background:#fff}
+.name:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-bg)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.between{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.meta{font-size:14px;font-weight:900;color:var(--muted)}
+.progress{height:12px;background:var(--panel);border-radius:999px;overflow:hidden;border:1px solid var(--border)}
+.progress span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--cyan));transition:width .25s ease}
+
+/* صفحه شروع */
+.start-card{
+  padding:0;overflow:hidden;border:0;background:linear-gradient(180deg,#eaf9ff 0%,#fff9e8 58%,#ffffff 100%);
+}
+.hero-sky{position:relative;min-height:250px;padding:24px 18px 18px;overflow:hidden}
+.hero-cloud{position:absolute;background:#fff;border-radius:999px;opacity:.95}
+.hero-cloud:before,.hero-cloud:after{content:"";position:absolute;background:#fff;border-radius:50%}
+.c1{width:95px;height:30px;left:18px;top:26px}.c1:before{width:38px;height:38px;left:15px;top:-18px}.c1:after{width:48px;height:48px;left:42px;top:-24px}
+.c2{width:78px;height:25px;right:18px;top:44px}.c2:before{width:32px;height:32px;right:12px;top:-15px}.c2:after{width:38px;height:38px;right:34px;top:-20px}
+.float-shape{position:absolute;filter:drop-shadow(0 5px 0 rgba(0,0,0,.05));animation:floaty 2.8s ease-in-out infinite}
+.fs1{left:11%;top:105px;width:38px;height:38px;background:var(--red);border-radius:7px}
+.fs2{right:10%;top:110px;width:42px;height:42px;background:var(--green);border-radius:50%;animation-delay:.5s}
+.fs3{right:28%;top:57px;width:0;height:0;border-left:22px solid transparent;border-right:22px solid transparent;border-bottom:40px solid var(--blue);animation-delay:1s}
+.hero-title{text-align:center;position:relative;z-index:2}
+.hero-title .badge{display:inline-block;background:#fff;border:2px solid #ffffffc9;border-radius:999px;padding:7px 13px;font-size:14px;font-weight:900;color:#475569;box-shadow:0 7px 20px rgba(30,64,175,.08)}
+.hero-title h1{font-size:clamp(27px,7vw,42px);line-height:1.35;margin:10px 0 6px;color:#283b65;text-shadow:0 2px 0 #fff}
+.hero-title p{margin:0;color:#52627c;line-height:1.9;font-weight:700}
+.kids{display:flex;justify-content:center;align-items:flex-end;gap:22px;margin-top:15px;position:relative;z-index:2}
+.kid{font-size:66px;line-height:1;filter:drop-shadow(0 8px 8px rgba(0,0,0,.10))}
+.sparkle{font-size:27px;align-self:center;animation:twinkle 1.4s ease-in-out infinite}
+.mission-chips{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.mission-chips span{background:#ffffffde;border:1px solid #dbeafe;border-radius:999px;padding:6px 10px;font-size:13px;font-weight:900}
+.start-form-box{background:#fff;border-top:1px solid #edf1f6;padding:17px}
+.start-caption{text-align:center;font-size:16px;font-weight:900;color:#374151;margin-bottom:10px}
+@keyframes floaty{50%{transform:translateY(-8px) rotate(4deg)}}
+@keyframes twinkle{50%{transform:scale(1.18)}}
+
+/* محتوای بازی */
+.top{display:grid;gap:8px}
+.question-head{display:flex;align-items:center;gap:8px;justify-content:center;font-size:14px;font-weight:900;color:var(--accent);margin-bottom:8px}
+.question{font-size:20px;font-weight:900;line-height:1.7;text-align:center;margin:0}
+.help{margin-top:12px;background:var(--panel);border:1px dashed var(--border);border-radius:15px;padding:10px 12px;color:var(--muted);line-height:1.8;font-size:14px}
+.question-zone{margin-top:14px;background:#fbfcfe;border:2px solid #e7ebf3;border-radius:20px;padding:14px 10px}
+.answer-zone{margin-top:20px;border-top:3px solid #e6eaf1;padding-top:16px}
+.zone-label{display:flex;justify-content:center;align-items:center;gap:7px;font-size:15px;font-weight:900;margin-bottom:10px}
+.question-zone .zone-label{color:#334155}.answer-zone .zone-label{color:var(--accent)}
+.seq-wrap{width:100%;overflow-x:auto;padding:2px 0 5px;overscroll-behavior-inline:contain}
+.seq{display:flex;direction:ltr;justify-content:center;align-items:center;gap:5px;flex-wrap:nowrap;min-width:max-content;margin:0 auto;padding:6px 2px}
+.shape{width:clamp(32px,8.5vw,50px);height:clamp(32px,8.5vw,50px);display:inline-grid;place-items:center;flex:0 0 auto}
+.shape.small{width:40px;height:40px}
+.circle{width:82%;height:82%;border-radius:50%;background:var(--c)}
+.square{width:80%;height:80%;border-radius:7px;background:var(--c)}
+.triangle{width:0;height:0;border-left:clamp(13px,3.6vw,22px) solid transparent;border-right:clamp(13px,3.6vw,22px) solid transparent;border-bottom:clamp(25px,7vw,41px) solid var(--c);transform:translateY(-2px)}
+.shape.small .triangle{border-left-width:16px;border-right-width:16px;border-bottom-width:30px}
+
+/* جای خالی الگو: بدون دایره/کادر نقطه‌چین */
+.pattern-slot{
+  width:clamp(34px,9vw,52px);height:clamp(34px,9vw,52px);
+  border:0;border-bottom:3px solid #cbd5e1;background:transparent;display:grid;place-items:center;flex:0 0 auto;padding:0
+}
+.pattern-slot.filled{border-bottom-color:transparent}
+
+/* گزینه‌ها */
+.options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.option{min-height:82px;border:2px solid var(--border);border-radius:18px;background:#fff;padding:10px;cursor:pointer;display:flex;direction:ltr;justify-content:center;align-items:center;gap:4px;flex-wrap:nowrap;overflow:hidden}
+.option.is-picked{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-bg)}
+.palette{display:flex;direction:ltr;justify-content:center;gap:12px;flex-wrap:wrap;background:var(--accent-bg);border:2px solid #dcdcf8;border-radius:18px;padding:12px}
+.palette button{min-width:72px;min-height:68px;border:2px solid #d7ddeb;border-radius:16px;background:#fff;display:grid;place-items:center;cursor:pointer}
+.note{text-align:center;font-size:13px;color:var(--muted);margin-top:8px}
+
+/* الگوسازی */
+.builder-scroll{overflow-x:auto;padding-bottom:2px}
+.builder{display:grid;grid-template-columns:repeat(9,44px);gap:5px;direction:ltr;width:max-content;margin:0 auto}
+.buildcell{width:44px;height:44px;border:2px solid #d7ddea;border-radius:11px;background:#fff;display:grid;place-items:center}
+.buildcell.selected{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-bg)}
+.buildcell.filled{border-color:transparent;background:transparent}
+
+/* جدول شگفت‌انگیز: جدول واقعی با خطوط پیوسته */
+.magic-table-wrap{width:min(100%,410px);margin:0 auto;background:#fff;border-radius:14px;overflow:hidden;border:3px solid #8fc5df}
+.magic-table{width:100%;border-collapse:collapse;table-layout:fixed;direction:ltr}
+.magic-table td{width:33.333%;aspect-ratio:1/1;border:2px solid #8fc5df;padding:0;background:#fff}
+.magic-table tr:first-child td{border-top:0}.magic-table tr:last-child td{border-bottom:0}
+.magic-table td:first-child{border-left:0}.magic-table td:last-child{border-right:0}
+.cell-btn{width:100%;height:100%;min-height:82px;border:0;background:#fff;display:grid;place-items:center;padding:3px;cursor:default}
+.cell-btn.blank{cursor:pointer;background:#fbfdff}
+.cell-btn.blank.selected{background:var(--accent-bg);box-shadow:inset 0 0 0 4px var(--accent)}
+.cell-btn.wrong{background:#fff7ed;box-shadow:inset 0 0 0 4px var(--orange)}
+.magic-answer-zone{margin-top:26px;border-top:4px solid #dfe5ee;padding-top:17px}
+.magic-palette{display:flex;direction:ltr;justify-content:center;gap:14px;flex-wrap:wrap}
+.magic-palette button{min-width:76px;min-height:72px;border:2px solid #cfd8e6;border-radius:18px;background:#fff;display:grid;place-items:center;cursor:pointer}
+
+.feedback{min-height:46px;border-radius:14px;padding:10px 12px;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:900;line-height:1.7;margin-top:14px}
+.feedback.ok{background:#ecfdf3;color:#166534;border:1px solid #bbf7d0}.feedback.no{background:#fff7ed;color:#9a3412;border:1px solid #fed7aa}
+.celebrate{text-align:center;padding:12px}.score-stars{font-size:30px;letter-spacing:4px}
+.statgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+.stat{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:12px;text-align:center}.stat b{display:block;font-size:22px}
+
+@media(max-width:520px){
+  body{padding:10px}
+  .hero-sky{min-height:235px;padding-inline:12px}
+  .kid{font-size:58px}
+  .question{font-size:18px}
+  .options{grid-template-columns:1fr}
+  .builder{grid-template-columns:repeat(9,38px)}.buildcell{width:38px;height:38px}
+  .cell-btn{min-height:74px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div id="game">
+  <section id="start" class="card start-card">
+    <div class="hero-sky">
+      <div class="hero-cloud c1"></div><div class="hero-cloud c2"></div>
+      <div class="float-shape fs1" aria-hidden="true"></div>
+      <div class="float-shape fs2" aria-hidden="true"></div>
+      <div class="float-shape fs3" aria-hidden="true"></div>
+
+      <div class="hero-title">
+        <span class="badge">🎒 ویژه‌ی کلاس اول</span>
+        <h1>بازی الگوهای رنگارنگ 🌈</h1>
+        <p>آماده‌ای الگوها را کشف کنی و جدول‌های شگفت‌انگیز را کامل کنی؟</p>
+        <div class="mission-chips">
+          <span>🔎 پیدا کن</span><span>🧩 ادامه بده</span><span>🎨 الگو بساز</span>
+        </div>
+      </div>
+
+      <div class="kids" aria-hidden="true">
+        <div class="kid">🧒🏻</div><div class="sparkle">✨</div><div class="kid">🧒🏽</div>
+      </div>
+    </div>
+
+    <div class="start-form-box">
+      <div class="start-caption">قهرمان کوچولو، اول اسمت را بنویس 👇</div>
+      <form id="startForm" style="display:grid;gap:10px">
+        <input id="name" class="name" maxlength="24" autocomplete="off" placeholder="نام دانش‌آموز">
+        <button class="btn" type="submit">بزن بریم! 🚀</button>
+        <div id="startMsg" style="font-size:14px;text-align:center" aria-live="polite"></div>
+      </form>
+    </div>
+  </section>
+
+  <section id="play" class="hidden">
+    <div class="card top">
+      <div class="between">
+        <div id="stageLabel" class="meta">مرحله ۱ از ۱۴</div>
+        <div class="row">
+          <span id="starLabel" class="meta">⭐ ۰</span>
+          <button id="soundBtn" class="btn secondary" type="button" aria-label="خاموش کردن صدا">🔊</button>
+        </div>
+      </div>
+      <div class="progress"><span id="progressBar"></span></div>
+    </div>
+
+    <div class="card">
+      <div class="question-head">👀 سؤال را خوب نگاه کن</div>
+      <div id="sectionName" class="meta" style="text-align:center;margin-bottom:4px"></div>
+      <h3 id="question" class="question"></h3>
+      <div id="help" class="help hidden"></div>
+      <div id="board"></div>
+      <div id="feedback" class="feedback hidden" aria-live="polite"></div>
+      <div class="between" style="margin-top:14px">
+        <button id="resetBtn" class="btn secondary" type="button">پاک کردن</button>
+        <button id="checkBtn" class="btn" type="button">بررسی کن</button>
+        <button id="nextBtn" class="btn hidden" type="button">مرحله بعد ←</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="end" class="card hidden">
+    <div class="celebrate">
+      <div style="font-size:50px">🎉🏆🎉</div>
+      <h2 id="endTitle" style="font-size:30px;margin:8px 0"></h2>
+      <div id="endMessage" style="color:var(--muted);line-height:1.8"></div>
+      <div id="endStars" class="score-stars" style="margin-top:12px"></div>
+      <div class="statgrid">
+        <div class="stat"><span>مراحل کامل‌شده</span><b>۱۴ از ۱۴</b></div>
+        <div class="stat"><span>درست در تلاش اول</span><b id="firstTry">۰</b></div>
+        <div class="stat"><span>ستاره‌ها</span><b id="totalStars">۰</b></div>
+        <div class="stat"><span>درصد موفقیت</span><b id="percent">۰٪</b></div>
+      </div>
+      <button id="restartBtn" class="btn" type="button" style="margin-top:16px">دوباره بازی کن 🔁</button>
+    </div>
+  </section>
+
+  <div class="footer">آموزگار: خانم سرازدان | دبستان نبوت</div>
+</div>
+
+<script>
+(()=>{
+const COLORS={red:'var(--red)',blue:'var(--blue)',green:'var(--green)',yellow:'var(--yellow)'};
+const SHAPES={
+ RS:{type:'square',color:'red',label:'مربع قرمز'},
+ BT:{type:'triangle',color:'blue',label:'مثلث آبی'},
+ GC:{type:'circle',color:'green',label:'دایره سبز'},
+ YS:{type:'square',color:'yellow',label:'مربع زرد'},
+ RT:{type:'triangle',color:'red',label:'مثلث قرمز'},
+ BS:{type:'square',color:'blue',label:'مربع آبی'}
+};
+const stages=[
+ {kind:'unit',section:'الگویابی',q:'کدام قسمت دوباره تکرار می‌شود؟',seq:['RS','BT','RS','BT','RS','BT'],options:[['RS','BT'],['RS','RS'],['BT','BT']],answer:0,help:'اول الگوی بالا را نگاه کن. بعد از پایین، گزینه‌ای را انتخاب کن که دوباره تکرار شده است.'},
+ {kind:'unit',section:'الگویابی',q:'قسمت تکرارشونده‌ی الگو را پیدا کن.',seq:['GC','GC','BT','GC','GC','BT'],options:[['GC','GC','BT'],['GC','BT'],['BT','GC','BT']],answer:0},
+ {kind:'unit',section:'الگویابی',q:'کدام گروه، واحد تکرارشونده‌ی این الگوست؟',seq:['YS','YS','GC','GC','YS','YS','GC','GC'],options:[['YS','YS','GC','GC'],['YS','GC'],['GC','GC','YS']],answer:0},
+
+ {kind:'fill',section:'ادامه‌ی الگو',q:'دو شکل بعدی الگو را پیدا کن.',seq:['RS','BT','RS','BT','RS','BT'],answers:['RS','BT'],palette:['RS','BT']},
+ {kind:'fill',section:'ادامه‌ی الگو',q:'شکل بعدی چیست؟',seq:['GC','GC','BT','GC','GC','BT','GC','GC'],answers:['BT'],palette:['GC','BT']},
+ {kind:'fill',section:'ادامه‌ی الگو',q:'سه شکل بعدی الگو را کامل کن.',seq:['BS','RS','BS','RS','BS','RS'],answers:['BS','RS','BS'],palette:['BS','RS']},
+
+ {kind:'build',section:'الگوسازی',q:'با مربع قرمز و مثلث آبی یک الگوی یکی‌درمیان بساز.',len:8,answer:['RS','BT','RS','BT','RS','BT','RS','BT'],palette:['RS','BT']},
+ {kind:'build',section:'الگوسازی',q:'دو دایره، یک مثلث؛ دوباره همین الگو را بساز.',len:9,answer:['GC','GC','BT','GC','GC','BT','GC','GC','BT'],palette:['GC','BT']},
+ {kind:'build',section:'الگوسازی',q:'دو مربع زرد و دو دایره سبز را مرتب تکرار کن.',len:8,answer:['YS','YS','GC','GC','YS','YS','GC','GC'],palette:['YS','GC']},
+
+ /* در هر جدول، سه خانه خالی دقیقاً شامل یک دایره، یک مثلث و یک مربع است
+    تا هر گزینه‌ی پایین بعد از استفاده حذف شود. */
+ {kind:'grid',section:'جدول شگفت‌انگیز',q:'سه خانه‌ی خالی را کامل کن.',grid:['GC','RT','BS','BS','GC','RT','RT','BS','GC'],blanks:[0,4,8],palette:['RT','BS','GC'],help:'در هر ردیف و ستون، هر شکل فقط یک بار می‌آید. هر گزینه‌ی پایین را هر چند بار که لازم بود می‌توانی انتخاب کنی.'},
+ {kind:'grid',section:'جدول شگفت‌انگیز',q:'با نگاه به سطرها و ستون‌ها، سه خانه را کامل کن.',grid:['RT','BS','GC','GC','RT','BS','BS','GC','RT'],blanks:[0,3,8],palette:['RT','BS','GC']},
+ {kind:'grid',section:'جدول شگفت‌انگیز',q:'جدول را کامل کن؛ هر شکل در هر سطر و ستون یک بار.',grid:['BS','GC','RT','RT','BS','GC','GC','RT','BS'],blanks:[1,5,6],palette:['RT','BS','GC']},
+ {kind:'grid',section:'جدول شگفت‌انگیز',q:'این بار هم سطرها و هم ستون‌ها را بررسی کن.',grid:['GC','BS','RT','RT','GC','BS','BS','RT','GC'],blanks:[1,4,6],palette:['RT','BS','GC']},
+ {kind:'grid',section:'جدول شگفت‌انگیز',q:'آخرین جدول! سه خانه را با دقت کامل کن.',grid:['RT','GC','BS','BS','RT','GC','GC','BS','RT'],blanks:[0,4,8],palette:['RT','BS','GC']}
+];
+
+const $=s=>document.querySelector(s);
+const start=$('#start'),play=$('#play'),end=$('#end'),board=$('#board'),feedback=$('#feedback');
+const checkBtn=$('#checkBtn'),nextBtn=$('#nextBtn');
+let stageIndex=0,attempts=0,stars=0,firstTry=0,player='',soundOn=true,pickedOption=null,values=[],selectedBlank=null,locked=false;
+
+function shapeHTML(code,small=false){
+ const s=SHAPES[code];
+ return `<span class="shape${small?' small':''}" role="img" aria-label="${s.label}"><span class="${s.type}" style="--c:${COLORS[s.color]}"></span></span>`;
+}
+function seqHTML(seq,small=false){return seq.map(c=>shapeHTML(c,small)).join('')}
+
+function tone(ok=true){
+ if(!soundOn)return;
+ try{
+  const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)return;
+  const ctx=new Ctx(),osc=ctx.createOscillator(),gain=ctx.createGain();
+  osc.type='sine';osc.frequency.value=ok?660:220;gain.gain.setValueAtTime(.06,ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.16);osc.connect(gain);gain.connect(ctx.destination);
+  osc.start();osc.stop(ctx.currentTime+.17);setTimeout(()=>ctx.close(),250);
+ }catch(e){}
+}
+function setFeedback(msg,ok){feedback.textContent=msg;feedback.className=`feedback ${ok?'ok':'no'}`}
+function clearFeedback(){feedback.textContent='';feedback.className='feedback hidden'}
+
+function render(){
+ locked=false;attempts=0;pickedOption=null;values=[];selectedBlank=null;clearFeedback();
+ nextBtn.classList.add('hidden');checkBtn.classList.remove('hidden');
+ const st=stages[stageIndex];
+ $('#stageLabel').textContent=`مرحله ${stageIndex+1} از ${stages.length}`;
+ $('#sectionName').textContent=st.section;$('#question').textContent=st.q;
+ $('#progressBar').style.width=`${(stageIndex/stages.length)*100}%`;$('#starLabel').textContent=`⭐ ${stars}`;
+ const help=$('#help');if(st.help){help.textContent=st.help;help.classList.remove('hidden')}else help.classList.add('hidden');
+
+ if(st.kind==='unit'){
+  board.innerHTML=`
+   <div class="question-zone">
+    <div class="zone-label">🔎 الگوی سؤال</div>
+    <div class="seq-wrap"><div class="seq">${seqHTML(st.seq)}</div></div>
+   </div>
+   <div class="answer-zone">
+    <div class="zone-label">👇 یکی از گزینه‌های پاسخ را انتخاب کن</div>
+    <div class="options">${st.options.map((op,i)=>`<button type="button" class="option" data-op="${i}" aria-label="گزینه ${i+1}">${seqHTML(op,true)}</button>`).join('')}</div>
+   </div>`;
+  board.querySelectorAll('[data-op]').forEach(btn=>btn.addEventListener('click',()=>{
+   if(locked)return;
+   board.querySelectorAll('[data-op]').forEach(b=>b.classList.remove('is-picked'));
+   btn.classList.add('is-picked');pickedOption=Number(btn.dataset.op);clearFeedback();
+  }));
+ }
+
+ if(st.kind==='fill'){
+  values=new Array(st.answers.length).fill(null);
+  board.innerHTML=`
+   <div class="question-zone">
+    <div class="zone-label">🔎 الگو را ادامه بده</div>
+    <div class="seq-wrap"><div class="seq" id="fillSeq">
+      ${seqHTML(st.seq)}
+      ${st.answers.map((_,i)=>`<span class="pattern-slot" data-slot="${i}" aria-label="جای خالی ${i+1}"></span>`).join('')}
+    </div></div>
+   </div>
+   <div class="answer-zone">
+    <div class="zone-label">👇 شکل بعدی را از اینجا انتخاب کن</div>
+    <div class="palette">${st.palette.map(c=>`<button type="button" data-fill-pick="${c}" aria-label="${SHAPES[c].label}">${shapeHTML(c,true)}</button>`).join('')}</div>
+    <div class="note">با هر انتخاب، شکل مستقیم در اولین جای خالیِ ادامه‌ی الگو قرار می‌گیرد.</div>
+   </div>`;
+  bindFillAuto();
+ }
+
+ if(st.kind==='build'){
+  values=new Array(st.len).fill(null);
+  board.innerHTML=`
+   <div class="question-zone">
+    <div class="zone-label">✏️ الگوی خودت را در این ردیف بساز</div>
+    <div class="builder-scroll"><div class="builder">${values.map((_,i)=>`<button type="button" class="buildcell" data-build="${i}" aria-label="خانه ${i+1}"></button>`).join('')}</div></div>
+   </div>
+   <div class="answer-zone">
+    <div class="zone-label">👇 شکل‌هایی که می‌توانی انتخاب کنی</div>
+    <div class="palette">${st.palette.map(c=>`<button type="button" data-build-pick="${c}" aria-label="${SHAPES[c].label}">${shapeHTML(c,true)}</button>`).join('')}</div>
+    <div class="note">خانه‌ی بالا را انتخاب کن و بعد شکل مناسب را از پایین بزن.</div>
+   </div>`;
+  bindBuild();
+ }
+
+ if(st.kind==='grid'){
+  values=st.grid.slice();st.blanks.forEach(i=>values[i]=null);
+  let rows='';
+  for(let r=0;r<3;r++){
+   rows+='<tr>';
+   for(let c=0;c<3;c++){
+    const i=r*3+c,isBlank=st.blanks.includes(i),v=values[i];
+    rows+=`<td><button type="button" class="cell-btn${isBlank?' blank':''}" ${isBlank?`data-grid-blank="${i}"`:''} aria-label="${isBlank?'خانه خالی':SHAPES[v].label}">${v?shapeHTML(v):''}</button></td>`;
+   }
+   rows+='</tr>';
+  }
+  board.innerHTML=`
+   <div class="question-zone">
+    <div class="zone-label">🧩 خودِ جدول سؤال</div>
+    <div class="magic-table-wrap"><table class="magic-table" aria-label="جدول شگفت انگیز"><tbody>${rows}</tbody></table></div>
+   </div>
+   <div class="magic-answer-zone">
+    <div class="zone-label">👇 گزینه‌های پاسخ</div>
+    <div class="magic-palette">${st.palette.map(c=>`<button type="button" data-grid-pick="${c}" aria-label="${SHAPES[c].label}">${shapeHTML(c)}</button>`).join('')}</div>
+    <div class="note">می‌توانی هر شکل پایین را هر چند بار که لازم است انتخاب کنی. برای عوض کردن پاسخ، دوباره همان خانه را لمس کن.</div>
+   </div>`;
+  bindGrid();
+ }
+}
+
+function bindFillAuto(){
+ board.querySelectorAll('[data-fill-pick]').forEach(btn=>btn.addEventListener('click',()=>{
+  if(locked)return;
+  const idx=values.findIndex(v=>!v);
+  if(idx===-1){setFeedback('همه‌ی جای خالی‌ها پر شده‌اند. حالا «بررسی کن» را بزن 🌟',true);return}
+  const code=btn.dataset.fillPick;
+  values[idx]=code;
+  const slot=board.querySelector(`[data-slot="${idx}"]`);
+  if(slot){slot.innerHTML=shapeHTML(code);slot.classList.add('filled')}
+  clearFeedback();
+ }));
+}
+
+function bindBuild(){
+ board.querySelectorAll('[data-build]').forEach(btn=>btn.addEventListener('click',()=>{
+  if(locked)return;
+  board.querySelectorAll('[data-build]').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');selectedBlank=Number(btn.dataset.build);clearFeedback();
+ }));
+ board.querySelectorAll('[data-build-pick]').forEach(btn=>btn.addEventListener('click',()=>{
+  if(locked)return;
+  if(selectedBlank===null){setFeedback('اول یکی از خانه‌های بالا را انتخاب کن 😊',false);return}
+  const code=btn.dataset.buildPick;values[selectedBlank]=code;
+  const cell=board.querySelector(`[data-build="${selectedBlank}"]`);
+  if(cell){cell.innerHTML=shapeHTML(code,true);cell.classList.remove('selected');cell.classList.add('filled')}
+  const next=values.findIndex(v=>!v);selectedBlank=next===-1?null:next;
+  if(selectedBlank!==null)board.querySelector(`[data-build="${selectedBlank}"]`)?.classList.add('selected');
+  clearFeedback();
+ }));
+}
+
+function bindGrid(){
+ board.querySelectorAll('[data-grid-blank]').forEach(btn=>btn.addEventListener('click',()=>{
+  if(locked)return;
+  board.querySelectorAll('[data-grid-blank]').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');selectedBlank=Number(btn.dataset.gridBlank);clearFeedback();
+ }));
+ board.querySelectorAll('[data-grid-pick]').forEach(btn=>btn.addEventListener('click',()=>{
+  if(locked)return;
+  if(selectedBlank===null){setFeedback('اول یکی از خانه‌های خالیِ جدول را انتخاب کن 😊',false);return}
+  const code=btn.dataset.gridPick;
+  values[selectedBlank]=code;
+  const cell=board.querySelector(`[data-grid-blank="${selectedBlank}"]`);
+  if(cell){
+    /* شکل داخل جدول هم‌اندازه‌ی سایر شکل‌هاست */
+    cell.innerHTML=shapeHTML(code);
+    cell.classList.remove('selected','wrong');
+  }
+  selectedBlank=null;
+  const stillBlank=[...board.querySelectorAll('[data-grid-blank]')].find(b=>{
+    const i=Number(b.dataset.gridBlank); return !values[i];
+  });
+  if(stillBlank){stillBlank.classList.add('selected');selectedBlank=Number(stillBlank.dataset.gridBlank)}
+  clearFeedback();
+ }));
+}
+
+function allFilled(){
+ const st=stages[stageIndex];
+ if(st.kind==='unit')return pickedOption!==null;
+ if(st.kind==='fill'||st.kind==='build')return values.every(Boolean);
+ if(st.kind==='grid')return st.blanks.every(i=>Boolean(values[i]));
+ return false;
+}
+function currentAnswer(){
+ const st=stages[stageIndex];
+ if(st.kind==='unit')return pickedOption===st.answer;
+ if(st.kind==='fill')return st.answers.every((x,i)=>values[i]===x);
+ if(st.kind==='build')return st.answer.every((x,i)=>values[i]===x);
+ if(st.kind==='grid')return st.blanks.every(i=>values[i]===st.grid[i]);
+ return false;
+}
+function wrongHints(){
+ const st=stages[stageIndex];
+ if(st.kind==='grid')st.blanks.forEach(i=>{
+  const c=board.querySelector(`[data-grid-blank="${i}"]`);
+  if(c)c.classList.toggle('wrong',values[i]&&values[i]!==st.grid[i]);
+ });
+}
+
+checkBtn.addEventListener('click',()=>{
+ if(locked)return;
+ if(!allFilled()){setFeedback('هنوز چند خانه خالی مانده. اول همه را کامل کن 🌟',false);tone(false);return}
+ attempts++;
+ if(currentAnswer()){
+  locked=true;if(attempts===1){stars+=3;firstTry++}else if(attempts===2)stars+=2;else stars+=1;
+  $('#starLabel').textContent=`⭐ ${stars}`;
+  const m=['آفرین قهرمان! 🌟','عالی بود! 👏','درست پیدا کردی! 🎉','چه خوب الگو رو کشف کردی! ✨','آفرین به این دقت! ⭐'];
+  setFeedback(m[(stageIndex+attempts)%m.length],true);tone(true);checkBtn.classList.add('hidden');nextBtn.classList.remove('hidden');
+ }else{
+  wrongHints();const m=['یک بار دیگه الگو رو نگاه کن 😊','قسمتی که تکرار می‌شه رو پیدا کن 👀','خیلی نزدیک بود! دوباره امتحان کن 💛'];
+  setFeedback(m[Math.min(attempts-1,2)],false);tone(false);
+ }
+});
+$('#resetBtn').addEventListener('click',()=>{if(!locked)render()});
+nextBtn.addEventListener('click',()=>{if(stageIndex<stages.length-1){stageIndex++;render()}else finish()});
+
+function finish(){
+ play.classList.add('hidden');end.classList.remove('hidden');
+ const max=stages.length*3,p=Math.round(stars/max*100);
+ $('#endTitle').textContent=`آفرین ${player}! 🎉`;$('#firstTry').textContent=firstTry;$('#totalStars').textContent=stars;$('#percent').textContent=`${p}٪`;
+ $('#endStars').textContent=p>=85?'⭐⭐⭐':p>=60?'⭐⭐':'⭐';
+ $('#endMessage').textContent=p>=85?'تو یک الگویاب حرفه‌ای شدی! 🌟':'خیلی خوب بود! با کمی تمرین عالی‌تر می‌شی 💛';tone(true);
+}
+$('#startForm').addEventListener('submit',e=>{
+ e.preventDefault();const n=$('#name').value.trim();
+ if(!n){$('#startMsg').textContent='اول اسمت رو برام بنویس 😊';$('#name').focus();return}
+ player=n;$('#startMsg').textContent='';start.classList.add('hidden');play.classList.remove('hidden');stageIndex=0;stars=0;firstTry=0;render();
+});
+$('#soundBtn').addEventListener('click',e=>{soundOn=!soundOn;e.currentTarget.textContent=soundOn?'🔊':'🔇';e.currentTarget.setAttribute('aria-label',soundOn?'خاموش کردن صدا':'روشن کردن صدا')});
+$('#restartBtn').addEventListener('click',()=>{end.classList.add('hidden');start.classList.remove('hidden');$('#name').value=player;$('#name').focus()});
+})();
+</script>
+</body>
+</html>
